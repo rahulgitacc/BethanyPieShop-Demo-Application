@@ -32,6 +32,7 @@ namespace BethanyPieShop
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IPieRepository, PieRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IOrderRepository, OrderRepository>();
             services.AddScoped<ShoppingCart>(sp => ShoppingCart.GetCart(sp));
             services.AddMvc();
             services.AddMemoryCache();
@@ -52,8 +53,21 @@ namespace BethanyPieShop
                 });
                 app.UseStaticFiles();
                 app.UseSession();
-                app.UseMvcWithDefaultRoute();
+                //app.UseMvcWithDefaultRoute();
+                app.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        name: "categoryfilter",
+                        template: "Pie/{action}/{category?}",
+                        defaults: new { Controller = "Pie", action = "List" }
+                    );
 
+                    routes.MapRoute(
+                        name: "dafault",
+                        template: "{controller=home}/{action=Index}/{id?}"
+                    );
+                });
+                app.UseMvc();
                 DbInitializer.Seed(app);
             }
 
