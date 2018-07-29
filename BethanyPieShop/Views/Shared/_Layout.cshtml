@@ -1,4 +1,15 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+@using System.Threading.Tasks
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject IAuthorizationService AuthorizationService
+@inject UserManager<IdentityUser> UserManager
+
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -27,6 +38,10 @@
                     @await Component.InvokeAsync("CategoryMenu")
                     <li><a asp-controller="Contact" asp-action="Index">Contact us</a></li>
                     @await Component.InvokeAsync("ShoppingCartSummary")
+                    @if (SignInManager.IsSignedIn(User))// && User.IsInRole("Administrator"))
+                    {
+                        @await Component.InvokeAsync("AdminMenuItem")
+                    }
                 </ul>
                 @await Html.PartialAsync("LoginPartial")
             </div>

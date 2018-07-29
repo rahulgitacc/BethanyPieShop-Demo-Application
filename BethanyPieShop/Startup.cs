@@ -30,7 +30,16 @@ namespace BethanyPieShop
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configurationRoot.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+
+
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.User.RequireUniqueEmail = true;
+
+            }).AddEntityFrameworkStores<AppDbContext>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IPieRepository, PieRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -48,31 +57,35 @@ namespace BethanyPieShop
             {
                 app.UseDeveloperExceptionPage();
                 app.UseStatusCodePages();
-                app.UseStaticFiles(new StaticFileOptions()
-                {
-                    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"node_modules")),
-                    RequestPath = new PathString("/vendor")
-                });
-                app.UseStaticFiles();
-                app.UseSession();
-                app.UseAuthentication();
-                //app.UseMvcWithDefaultRoute();
-                app.UseMvc(routes =>
-                {
-                    routes.MapRoute(
-                        name: "categoryfilter",
-                        template: "Pie/{action}/{category?}",
-                        defaults: new { Controller = "Pie", action = "List" }
-                    );
-
-                    routes.MapRoute(
-                        name: "dafault",
-                        template: "{controller=home}/{action=Index}/{id?}"
-                    );
-                });
-                app.UseMvc();
-                DbInitializer.Seed(app);
             }
+            else
+            {
+                app.UseExceptionHandler("/AppException");
+            }
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"node_modules")),
+                RequestPath = new PathString("/vendor")
+            });
+            app.UseStaticFiles();
+            app.UseSession();
+            app.UseAuthentication();
+            //app.UseMvcWithDefaultRoute();
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "categoryfilter",
+                    template: "Pie/{action}/{category?}",
+                    defaults: new { Controller = "Pie", action = "List" }
+                );
+
+                routes.MapRoute(
+                    name: "dafault",
+                    template: "{controller=home}/{action=Index}/{id?}"
+                );
+            });
+            app.UseMvc();
+            DbInitializer.Seed(app);
 
         }
     }
