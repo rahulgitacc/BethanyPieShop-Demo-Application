@@ -1,4 +1,5 @@
 ﻿using BethanyPieShop.ApplicationDbContext;
+using BethanyPieShop.Auth;
 using BethanyPieShop.Interfaces;
 using BethanyPieShop.Models;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,7 @@ namespace BethanyPieShop
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configurationRoot.GetConnectionString("DefaultConnection")));
 
 
-            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = true;

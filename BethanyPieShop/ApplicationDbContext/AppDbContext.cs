@@ -1,11 +1,11 @@
-﻿using BethanyPieShop.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using BethanyPieShop.Auth;
+using BethanyPieShop.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BethanyPieShop.ApplicationDbContext
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> option) : base(option)
         { }

@@ -1,4 +1,5 @@
-﻿using BethanyPieShop.ViewModels;
+﻿using BethanyPieShop.Auth;
+using BethanyPieShop.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,9 @@ namespace BethanyPieShop.Controllers
     [Authorize]
     public class AdminController : Controller
     {
-        public UserManager<IdentityUser> userManager;
+        public UserManager<ApplicationUser> userManager;
 
-        public AdminController(UserManager<IdentityUser> userManager)
+        public AdminController(UserManager<ApplicationUser> userManager)
         {
             this.userManager = userManager;
         }
@@ -39,10 +40,13 @@ namespace BethanyPieShop.Controllers
         {
             if (!ModelState.IsValid) return View(addUserViewModel);
 
-            var user = new IdentityUser()
+            var user = new ApplicationUser()
             {
                 UserName = addUserViewModel.UserName,
-                Email = addUserViewModel.Email
+                Email = addUserViewModel.Email,
+                Birthdate = addUserViewModel.Birthdate,
+                City = addUserViewModel.City,
+                Country = addUserViewModel.Country
             };
 
             IdentityResult result = await userManager.CreateAsync(user, addUserViewModel.Password);
@@ -66,7 +70,9 @@ namespace BethanyPieShop.Controllers
             if (user == null)
                 return RedirectToAction("UserManagement", userManager.Users);
 
-            return View(user);
+            var vm = new EditUserViewModel() { Id = user.Id, Email = user.Email, UserName = user.UserName, Birthdate = user.Birthdate, City = user.City, Country = user.Country };
+
+            return View(vm);
         }
 
         [HttpPost]
@@ -95,7 +101,7 @@ namespace BethanyPieShop.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteUser(string userId)
         {
-            IdentityUser user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
 
             if (user != null)
             {
