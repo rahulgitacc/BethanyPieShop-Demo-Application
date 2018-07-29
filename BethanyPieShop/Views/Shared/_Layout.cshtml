@@ -7,6 +7,7 @@
     <link href="~/Content/site.css" rel="stylesheet" />
     <script src="~/vendor/jquery/dist/jquery.js"></script>
     <script src="~/vendor/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/Scripts/Common.js"></script>
     <title>Bethany Pie Shop</title>
 </head>
 <body>
@@ -27,6 +28,7 @@
                     <li><a asp-controller="Contact" asp-action="Index">Contact us</a></li>
                     @await Component.InvokeAsync("ShoppingCartSummary")
                 </ul>
+                @await Html.PartialAsync("LoginPartial")
             </div>
         </div>
     </nav>
@@ -42,5 +44,6 @@
             </div>
         </div>
     </div>
+    @RenderSection("scripts", required: false)
 </body>
 </html>
