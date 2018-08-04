@@ -1,9 +1,11 @@
-﻿using BethanyPieShop.Auth;
+﻿using BethanyPieShop.ApplicationDbContext;
+using BethanyPieShop.Auth;
 using BethanyPieShop.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BethanyPieShop.Controllers
@@ -13,11 +15,13 @@ namespace BethanyPieShop.Controllers
     {
         public readonly UserManager<ApplicationUser> userManager;
         public readonly RoleManager<IdentityRole> roleManager;
+        public readonly AppDbContext appDbContext;
 
-        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, AppDbContext appDbContext)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this.appDbContext = appDbContext;
         }
 
         // GET: /<controller>/
@@ -73,7 +77,8 @@ namespace BethanyPieShop.Controllers
             if (user == null)
                 return RedirectToAction("UserManagement", userManager.Users);
 
-            var vm = new EditUserViewModel() { Id = user.Id, Email = user.Email, UserName = user.UserName, Birthdate = user.Birthdate, City = user.City, Country = user.Country };
+            var claims = await userManager.GetClaimsAsync(user);
+            var vm = new EditUserViewModel() { Id = user.Id, Email = user.Email, UserName = user.UserName, UserClaims = claims.Select(c => c.Value).ToList() };
 
             return View(vm);
         }
@@ -300,6 +305,45 @@ namespace BethanyPieShop.Controllers
             }
 
             return View(userRoleViewModel);
+        }
+
+        //Claims
+        public async Task<IActionResult> ManageClaimsForUser(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return RedirectToAction("UserManagement", userManager.Users);
+
+            var claimsManagementViewModel = new ClaimsManagementViewModel { UserId = user.Id, AllClaimsList = BethanysPieShopClaimTypes.ClaimsList };
+
+            return View(claimsManagementViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageClaimsForUser(ClaimsManagementViewModel claimsManagementViewModel)
+        {
+            var user = await userManager.FindByIdAsync(claimsManagementViewModel.UserId);
+
+            if (user == null)
+                return RedirectToAction("UserManagement", userManager.Users);
+            //user.Claims.Add(new IdentityUserClaim<string>
+            //{
+            //    ClaimType = claimsManagementViewModel.ClaimId,
+            //    ClaimValue = claimsManagementViewModel.ClaimId
+            //}););
+            IdentityUserClaim<string> claim =
+                new IdentityUserClaim<string> { ClaimType = claimsManagementViewModel.ClaimId, ClaimValue = claimsManagementViewModel.ClaimId };
+
+            appDbContext.UserClaims.Add(claim);
+            var result = await userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+                return RedirectToAction("UserManagement", userManager.Users);
+
+            ModelState.AddModelError("", "User not updated, something went wrong.");
+
+            return View(claimsManagementViewModel);
         }
     }
 }

@@ -18,6 +18,17 @@ namespace BethanyPieShop.Interfaces
                 };
 
         public IEnumerable<Pie> PiesOfTheWeek { get; }
+
+        public void CreatePie(Pie pie)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Pie GetPieById(int pieId) => throw new System.NotImplementedException();
+
+        public void UpdatePie(Pie pie)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -47,6 +47,13 @@ namespace BethanyPieShop
             services.AddTransient<IOrderRepository, OrderRepository>();
             services.AddScoped<ShoppingCart>(sp => ShoppingCart.GetCart(sp));
             services.AddMvc();
+            //Claims-based
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
+                options.AddPolicy("DeletePie", policy => policy.RequireClaim("Delete Pie", "Delete Pie"));
+                options.AddPolicy("AddPie", policy => policy.RequireClaim("Add Pie", "Add Pie"));
+            });
             services.AddMemoryCache();
             services.AddSession();
         }
@@ -86,6 +93,9 @@ namespace BethanyPieShop
                 );
             });
             app.UseMvc();
+
+            //claims based settings
+
             DbInitializer.Seed(app);
 
         }
